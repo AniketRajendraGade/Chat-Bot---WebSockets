@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chatbot</title>
     <style>
+        /* Resetting default margin and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f2f5;
@@ -13,72 +21,142 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden; /* Prevent body scrolling */
         }
+
+        /* Chat container styles */
         .chat-container {
-            background-color: white;
+            background-color: #fff;
             width: 400px;
             max-width: 100%;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             height: 80vh; /* Adjust height as needed */
+            animation: slideIn 0.6s ease-out forwards; /* Animation for initial appearance */
         }
+
+        /* Animation keyframes for sliding in effect */
+        @keyframes slideIn {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        /* Chat header styles */
         .chat-header {
             background-color: #007bff;
             color: white;
-            padding: 10px;
+            padding: 15px;
             text-align: center;
+            border-bottom: 1px solid #0056b3;
         }
+
+        /* Chat body styles */
         .chat-body {
             flex: 1;
-            padding: 10px;
+            padding: 15px;
             overflow-y: auto;
+            scroll-behavior: smooth; /* Smooth scrolling */
         }
-        .chat-message {
+
+        /* Chat message container styles */
+        .chat-message-container {
             display: flex;
-            margin-bottom: 10px;
+            justify-content: flex-end; /* Align messages to the right */
+            margin-bottom: 15px;
+            animation: fadeIn 0.5s ease-out forwards; /* Animation for message fade-in */
         }
-        .chat-message.bot {
-            justify-content: flex-start;
+
+        /* Animation keyframes for message fade-in */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
-        .chat-message.user {
-            justify-content: flex-end;
+
+        /* Bot message container styles */
+        .chat-message-container.bot {
+            justify-content: flex-start; /* Align messages to the left */
         }
-        .chat-message.bot .message {
+
+        /* Message bubble styles */
+        .message-bubble {
             background-color: #e9ecef;
-            border-radius: 20px 20px 20px 0;
+            border-radius: 20px;
+            padding: 12px 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            margin-left: 10px; /* Spacing between message bubbles */
+            margin-right: 10px;
         }
-        .chat-message.user .message {
+
+        /* User message bubble styles */
+        .message-bubble.user {
             background-color: #007bff;
             color: white;
             border-radius: 20px 20px 0 20px;
         }
-        .message {
-            padding: 10px;
-            max-width: 80%;
-        }
+
+        /* Chat footer styles */
         .chat-footer {
             display: flex;
-            padding: 10px;
+            align-items: center;
+            padding: 15px;
             border-top: 1px solid #e9ecef;
+            animation: slideInFooter 0.6s ease-out forwards; /* Animation for footer slide-in */
         }
+
+        /* Animation keyframes for footer slide-in */
+        @keyframes slideInFooter {
+            0% {
+                transform: translateY(100%);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        /* Input field styles */
         .chat-footer input {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #e9ecef;
             border-radius: 20px;
             margin-right: 10px;
             outline: none;
+            transition: border-color 0.3s ease;
         }
+
+        /* Input field focus styles */
+        .chat-footer input:focus {
+            border-color: #007bff;
+        }
+
+        /* Send button styles */
         .chat-footer button {
             background-color: #007bff;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 20px;
             border-radius: 20px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Send button hover styles */
+        .chat-footer button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -135,15 +213,18 @@
 
         function appendMessage(sender, message) {
             const chatLog = document.querySelector('#chat-log');
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('chat-message', sender);
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('chat-message-container', sender === 'user' ? 'user' : 'bot');
 
-            const messageContent = document.createElement('div');
-            messageContent.classList.add('message');
-            messageContent.textContent = message;
+            const messageBubble = document.createElement('div');
+            messageBubble.classList.add('message-bubble', sender);
 
-            messageDiv.appendChild(messageContent);
-            chatLog.appendChild(messageDiv);
+            const messageText = document.createElement('span');
+            messageText.textContent = message;
+
+            messageBubble.appendChild(messageText);
+            messageContainer.appendChild(messageBubble);
+            chatLog.appendChild(messageContainer);
 
             chatLog.scrollTop = chatLog.scrollHeight;
         }
