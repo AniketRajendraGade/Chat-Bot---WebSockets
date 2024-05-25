@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            background-color: white;
+            width: 400px;
+            max-width: 100%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 80vh; /* Adjust height as needed */
+        }
+        .chat-header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        .chat-body {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .chat-message {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .chat-message.bot {
+            justify-content: flex-start;
+        }
+        .chat-message.user {
+            justify-content: flex-end;
+        }
+        .chat-message.bot .message {
+            background-color: #e9ecef;
+            border-radius: 20px 20px 20px 0;
+        }
+        .chat-message.user .message {
+            background-color: #007bff;
+            color: white;
+            border-radius: 20px 20px 0 20px;
+        }
+        .message {
+            padding: 10px;
+            max-width: 80%;
+        }
+        .chat-footer {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #e9ecef;
+        }
+        .chat-footer input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            border-radius: 20px;
+            margin-right: 10px;
+            outline: none;
+        }
+        .chat-footer button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>AI Chatbot</h1>
+        </div>
+        <div class="chat-body" id="chat-log">
+            <!-- Messages will appear here -->
+        </div>
+        <div class="chat-footer">
+            <input id="chat-message-input" type="text" placeholder="Type a message">
+            <button id="chat-message-submit">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chatbot');
+
+        chatSocket.onopen = function(e) {
+            console.log('WebSocket connection established');
+        };
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            appendMessage('bot', data.response_message);
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        chatSocket.onerror = function(e) {
+            console.error('WebSocket error: ', e);
+        };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // Enter key
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            appendMessage('user', message);
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInputDom.value = '';
+        };
+
+        function appendMessage(sender, message) {
+            const chatLog = document.querySelector('#chat-log');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message', sender);
+
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('message');
+            messageContent.textContent = message;
+
+            messageDiv.appendChild(messageContent);
+            chatLog.appendChild(messageDiv);
+
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+    </script>
+</body>
+</html>
